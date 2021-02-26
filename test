@@ -1,0 +1,5 @@
+theme blue
+print testing the script mode
+pwd
+theme red
+log

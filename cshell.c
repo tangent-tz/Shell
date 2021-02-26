@@ -27,21 +27,65 @@ int main (int argc, char*argv[]){
 	Command *log_list=(Command*)malloc(MAX*sizeof(Command));
 	int log_count=0;
 	time_t clock;
-	
-
-
+	char** script_str=(char**)malloc(MAX * sizeof(char*));
+	int script_counter=0;
+	int script_run_counter=0;
 
 	prompt();
-//Main loop
+
+
+	if(argc==2){
+		printf("Script mode\n\n");	
+		FILE *fp = fopen(argv[1], "r");
+     	if(fp == NULL) {
+        perror("Unable to open file!");
+         exit(1);
+     	}
+ 
+     	char script_read[MAX];
+     	//script_str[0]=(char*)malloc(MAX * sizeof(char));
+     	
+     	for( ;fgets(script_read, sizeof(script_read), fp)!=NULL; script_counter++){
+     	}
+     	fclose(fp);
+
+     	fp = fopen(argv[1], "r");
+
+     	if(fp == NULL) {
+        perror("Unable to open file!");
+         exit(1);
+     	}
+
+     	for( int i=0;i<script_counter+1; i++){
+     		script_str[i]=(char*)malloc(MAX * sizeof(char));
+     		fgets(script_str[i], sizeof(script_read), fp);
+     	}
+ 	  	
+     	fclose(fp);
+	}
+	else
+		printf("Interactive mode\n\n");
+
+//Main loop		
 	while(1){
 	
 		log_list[log_count].name=(char*)malloc(sizeof(char));
 		printf("cshell~$ ");
-		str=read_line();
+		if(argc==1){
+			str=read_line();
+		}
+		else{
+			if(script_run_counter==script_counter){
+				printf("Exiting Script mode\n");
+				exit(0);
+			}
+					
+			str=script_str[script_run_counter];
+			script_run_counter++;
+		}
 		numberoftokens=number_of_tokens(str);
 		test=tokenizer(str, number_of_tokens(str));
 		strcpy(log_list[log_count].name, test[0]);
-		printf("%d\n", log_count );
 		time(&clock);
 		log_list[log_count].time=localtime(&clock);
 
@@ -58,23 +102,18 @@ int main (int argc, char*argv[]){
 			char target[MAX];
 			strncpy(target, test[0], positon);
 			target[positon]='\0';
-			printf("%d\n", EnvVar_count );
 			int result_search=environment_search(EnvVar_count, environment_vals,target);
-			printf("%d\n", result_search );
 			if(result_search!=-1){
 				strncpy(environment_vals[result_search].value, test[0]+positon+1, (int)strlen(test[0])-positon);
 				continue;
 			}
 
-
-			if(strpbrk(test[0]+positon+1, ascii)==NULL){
 				environment_vals[EnvVar_count].name=(char*)malloc(sizeof(char));
 				environment_vals[EnvVar_count].value=(char*)malloc(sizeof(char));
 				strncpy(environment_vals[EnvVar_count].name, test[0], positon);
 				environment_vals[EnvVar_count].name[positon]='\0';
 				strncpy(environment_vals[EnvVar_count].value, test[0]+positon+1, (int)strlen(test[0])-positon);
 				EnvVar_count++;
-			}
 			goto misc;
 		}
 
